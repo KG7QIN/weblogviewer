@@ -1,0 +1,33 @@
+version: '3'
+services:
+  logview:
+    image: logview
+    build: .
+    container_name: logview
+    restart: always
+    environment:
+      - LOGSRV_HOST=172.19.10.3
+      - LOGSRV_PORT=8765
+      - LOGSRV_WEBHOST=172.19.10.3
+      - LOGSRV_WEBPORT=8000
+      - LOGSRV_PREFIX=/usr/src/app/logs/
+      - LOGSRV_SSL=localhost.pem
+      - LOGSRV_WEBSOCKURL=wss://<address>/usr/src/app/logs/mail.log?tail=1
+      - LOGSRV_NEWLINE=0
+      - LOGSRV_TITLE=Dockerized Tailing Log Viewer
+    volumes:
+      - ./log/:/usr/src/app/logs/
+    healthcheck:
+      test: "curl 172.19.10.3:8000/health | grep -P 'HEALTHY' || exit 1"
+      timeout:  3s
+      retries: 0
+    networks:
+      default:
+        ipv4_address: 172.19.10.3
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.19.10.0/24
+

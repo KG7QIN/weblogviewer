@@ -1,36 +1,53 @@
-# Logviewer
+Modified from: https://github.com/jizhang/logviewer
+--
 
-## Development
+# Introduction
 
-Require Python 3.7 or newer.
+Dockerized version of the logfile viewer presented by Ji ZHANG in their blog https://shzhangji.com/blog/2017/07/15/log-tailer-with-websocket-and-python/
 
-```
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
+This version has been modified to:
+* Work in Dockerized environments
+* Uses Jinja2 templating to allow for the websocket (server.py) to be specified
+* Can work with SSL (wss://) for websocket server
+* Uses envrionment variables in docker-compose.yml files for configuration
+* The log file's line are properly word wrapped to keep them from going off screen
+* The webserver and websockets servers are combined so only one file is needed
+* Only the .html file that is rendered by the jinja2 templating engine is served regardless of what is requested
 
-## Demo
+While this is not the most ideal way to do this, it works and was an exercise in how to improve this basic tutorial on websocks for a specific application
 
-### Start WebSocket server
+I use this with Cloudflare's Zero Trust to view the logs of a docker-mailserver install.
 
-```
-$ python server.py -h
-usage: server.py [-h] [--host HOST] [--port PORT] --prefix PREFIX
+Note:  This can be used in a docker container or stand alone.  Both environment varilables and command line swtiches can be used, but environment variables
+will override the command line switches.
 
-optional arguments:
-  -h, --help       show this help message and exit
-  --host HOST
-  --port PORT
-  --prefix PREFIX  Allowed directories
+--
 
-$ python server.py --host 127.0.0.1 --port 8765 --prefix /tmp/ --prefix /tmp/dir1
-```
+## Environment Variables
+The following environment variables are available for use with Docker/docker-compose
 
-### Start demo client
+* LOGSRV_HOST       - Websocket server hostname/IP address
+* LOGSRV_PORT       - Websocket server port
+* LOGSRV_WEBHOST    - Webserver hostname/IP address
+* LOGSRV_WEBPORT    - Webserver port
+* LOGSRV_PREFIX     - Websocket server logs prefix
+* LOGSRV_SSL        - SSL certificate in .pem format
+* LOGSRV_WEBSOCKURL - URL of Websocket server (ws:// and wss:// supported with SSL cert).  Used by HTML file to connect to server.
+* LOGSRV_NEWLINE    - Add a newline before each log line printed (0-no/1-yes)
+* LOGSRV_TITLE      - HTML webpage title
 
-```
-python -m http.server
-```
+## Command Line Switches
+The following command line swtiches are available for use as well
 
-Create `/tmp/demo.log` file and browse `http://localhost:8000/demo.html`, you will see the content of the log file. Append logs to this file and the content will be shown in browser immediately.
+* --host            - Websocket server hostname/IP address
+* --port            - Websocker server port
+* --webhost         - Webserver hostname/IP address
+* --webport         - Webserver port
+* --prefix          - Websocket server prefix
+* --websockurl      - URL of Websocket server.  (ws:// and wss:// supported with SSL cert).  Use by HTML file to connect to server.
+* --ssl             - SSL certificate in .pem format
+* --title           - HTML webpage title
+* --newline         - Add by itself to add a newline before each log line printed
+
+
+

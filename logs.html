@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>{{ pagetitle }}</title>
+    <style>
+       .logs-txt  {
+	  font-size: 10pt;
+	  font: courier new;
+	  max-width: 95%;
+	  overflow-wrap: break-word;
+          word-break: break-word;
+	  white-space: pre-wrap;
+       }
+    </style>
+  </head>
+  <body>
+    <pre id="logs" class="logs-txt"></pre>
+    <script>
+      function qs(sel) { return document.querySelector(sel); };
+      function writeOutput(s) {
+	          let chatOutput = qs('#logs');
+	          let innerHTML = chatOutput.innerHTML;
+
+	          // Add a newline before new output
+	          {% if newline %}
+	          let newOutput = innerHTML === ''? s: '<br/>' + s;
+                  {% else %}
+	          let newOutput = innerHTML === ''? s: '' + s;
+	          {% endif %}
+
+	          chatOutput.innerHTML = innerHTML + newOutput;
+
+	          // Scroll to bottom
+	          chatOutput.scrollTop = chatOutput.scrollHeight;
+      };
+
+      let ws = new WebSocket('{{ serverurl }}')
+      ws.onmessage = (event) => {
+        if (event.data === 'ping') {
+          ws.send('pong')
+          return
+        }
+	writeOutput(event.data);
+	window.scrollTo(0, document.body.scrollHeight);
+      }
+    </script>
+  </body>
+</html>
+
